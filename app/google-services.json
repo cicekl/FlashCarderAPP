@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "969456140165",
+    "project_id": "flashcarderapp-dcf17",
+    "storage_bucket": "flashcarderapp-dcf17.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969456140165:android:5f5d90d7009b1d33c54eec",
+        "android_client_info": {
+          "package_name": "hr.ferit.lorenacicek.flashcarder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA048a6Q-u8g_PyyeA8CStpoTtKwtL8CBE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

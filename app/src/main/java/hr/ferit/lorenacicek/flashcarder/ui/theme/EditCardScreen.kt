@@ -1,4 +1,6 @@
 package hr.ferit.lorenacicek.flashcarder.ui.theme
+import android.net.Uri
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -23,6 +25,7 @@ import coil3.compose.rememberAsyncImagePainter
 import hr.ferit.lorenacicek.flashcarder.R
 import hr.ferit.lorenacicek.flashcarder.data.MyFlashcard
 import hr.ferit.lorenacicek.flashcarder.viewmodels.MyFlashcardViewModel
+
 
 @Composable
 fun EditCardScreen(
@@ -57,204 +60,220 @@ fun EditCardScreen(
     }
 
     if (flashcards.isEmpty()) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Color(0xFFFFE135)
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 50.dp, start = 16.dp, end = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-
-                    IconButton(onClick = {
-                        navController.navigate("add_flashcards_screen?setId=$setId")
-                    }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Flashcards", tint = Color.Black)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(200.dp))
-
-                Text(
-                    text = "No cards available",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Click on the '+' icon to add a new card.",
-                    fontSize = 16.sp,
-                    color = Color.Black
-                )
-            }
-        }
+        EmptyFlashcardsScreen(navController, setId)
     } else {
-        val currentCard = flashcards[currentIndex]
+        FlashcardsEditor(
+            navController = navController,
+            viewModel = viewModel,
+            flashcards = flashcards,
+            currentIndex = currentIndex,
+            onIndexChange = { currentIndex = it },
+            termImagePicker = termImagePicker,
+            definitionImagePicker = definitionImagePicker
+        )
+    }
+}
 
-        Surface(
+@Composable
+fun EmptyFlashcardsScreen(navController: NavHostController, setId: String) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFFFE135)
+    ) {
+        Column(
             modifier = Modifier.fillMaxSize(),
-            color = Color(0xFFFFE135)
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
+            Header(navController = navController, setId = setId)
+            Spacer(modifier = Modifier.height(200.dp))
+            Text(
+                text = "No cards available",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Click on the '+' icon to add a new card.",
+                fontSize = 16.sp,
+                color = Color.Black
+            )
+        }
+    }
+}
+
+@Composable
+fun Header(navController: NavHostController, setId: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 50.dp, start = 16.dp, end = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = { navController.popBackStack() }) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+        }
+        IconButton(onClick = { navController.navigate("add_flashcards_screen?setId=$setId") }) {
+            Icon(Icons.Default.Add, contentDescription = "Add Flashcards", tint = Color.Black)
+        }
+    }
+}
+
+@Composable
+fun FlashcardsEditor(
+    navController: NavHostController,
+    viewModel: MyFlashcardViewModel,
+    flashcards: List<MyFlashcard>,
+    currentIndex: Int,
+    onIndexChange: (Int) -> Unit,
+    termImagePicker: ManagedActivityResultLauncher<String, Uri?>,
+    definitionImagePicker: ManagedActivityResultLauncher<String, Uri?>
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFFFE135)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            EditorHeader(navController, viewModel, flashcards[currentIndex])
+            Spacer(modifier = Modifier.height(50.dp))
+            Text("CARD #${currentIndex + 1}", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(20.dp))
+            CardEditor(
+                currentCard = flashcards[currentIndex],
+                onFlashcardChange = { updatedCard ->
+                    flashcards.toMutableList().apply {
+                        this[currentIndex] = updatedCard
+                    }
+                },
+                termImagePicker = termImagePicker,
+                definitionImagePicker = definitionImagePicker
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            NavigationButtons(
+                currentIndex = currentIndex,
+                flashcardsSize = flashcards.size,
+                onIndexChange = onIndexChange
+            )
+        }
+    }
+}
+
+@Composable
+fun EditorHeader(navController: NavHostController, viewModel: MyFlashcardViewModel, currentCard: MyFlashcard) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 50.dp, bottom = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        IconButton(onClick = { navController.popBackStack() }) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+        }
+        IconButton(onClick = {
+            viewModel.updateCard(
+                cardId = currentCard.id,
+                termText = currentCard.termText,
+                definitionText = currentCard.definitionText,
+                termImageUrl = currentCard.termImageUrl,
+                definitionImageUrl = currentCard.definitionImageUrl
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 50.dp, bottom = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-
-                    IconButton(onClick = {
-                        viewModel.updateCard(
-                            cardId = currentCard.id,
-                            termText = currentCard.termText,
-                            definitionText = currentCard.definitionText,
-                            termImageUrl = currentCard.termImageUrl,
-                            definitionImageUrl = currentCard.definitionImageUrl
-                        ) {
-                            navController.popBackStack()
-                        }
-                    }) {
-                        Icon(Icons.Filled.Done, contentDescription = "Save")
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(50.dp))
-
-                Text(text = "CARD #${currentIndex + 1}", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                TextField(
-                    value = currentCard.termText ?: "",
-                    onValueChange = { newTerm ->
-                        flashcards = flashcards.toMutableList().apply {
-                            this[currentIndex] = currentCard.copy(termText = newTerm)
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Term (front side)") }
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                ) {
-                    IconButton(
-                        onClick = { termImagePicker.launch("image/*") },
-                        modifier = Modifier.size(56.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.picture_icon),
-                            contentDescription = "Add Term Image",
-                            tint = Color.Black
-                        )
-                    }
-
-                    currentCard.termImageUrl?.let { uri ->
-                        Image(
-                            painter = rememberAsyncImagePainter(uri),
-                            contentDescription = "Selected Term Image",
-                            modifier = Modifier
-                                .size(56.dp)
-                                .padding(start = 8.dp)
-                        )
-                    }
-                }
-
-                TextField(
-                    value = currentCard.definitionText ?: "",
-                    onValueChange = { newDefinition ->
-                        flashcards = flashcards.toMutableList().apply {
-                            this[currentIndex] = currentCard.copy(definitionText = newDefinition)
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Definition (back side)") }
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                ) {
-                    IconButton(
-                        onClick = { definitionImagePicker.launch("image/*") },
-                        modifier = Modifier.size(56.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.picture_icon),
-                            contentDescription = "Add Definition Image",
-                            tint = Color.Black
-                        )
-                    }
-
-                    currentCard.definitionImageUrl?.let { uri ->
-                        Image(
-                            painter = rememberAsyncImagePainter(uri),
-                            contentDescription = "Selected Definition Image",
-                            modifier = Modifier
-                                .size(56.dp)
-                                .padding(start = 8.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Button(
-                        onClick = {
-                            if (currentIndex > 0) {
-                                currentIndex -= 1
-                            }
-                        },
-                        enabled = currentIndex > 0,
-                        modifier = Modifier.width(120.dp)
-
-                    ) {
-                        Text(text = "Previous", color = Color.Black,fontWeight = FontWeight.Bold,fontStyle = FontStyle.Italic)
-                    }
-
-                    Button(
-                        onClick = {
-                            if (currentIndex < flashcards.size - 1) {
-                                currentIndex += 1
-                            }
-                        },
-                        enabled = currentIndex < flashcards.size - 1,
-                        modifier = Modifier.width(120.dp)
-                    ) {
-                        Text(text = "Next", color = Color.Black,fontWeight = FontWeight.Bold,fontStyle = FontStyle.Italic)
-                    }
-                }
+                navController.popBackStack()
             }
+        }) {
+            Icon(Icons.Filled.Done, contentDescription = "Save")
+        }
+    }
+}
+
+@Composable
+fun CardEditor(
+    currentCard: MyFlashcard,
+    onFlashcardChange: (MyFlashcard) -> Unit,
+    termImagePicker: ManagedActivityResultLauncher<String, Uri?>,
+    definitionImagePicker: ManagedActivityResultLauncher<String, Uri?>
+) {
+    TextField(
+        value = currentCard.termText ?: "",
+        onValueChange = { newTerm -> onFlashcardChange(currentCard.copy(termText = newTerm)) },
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text("Term (front side)") }
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    ImagePickerRow(
+        imageUri = currentCard.termImageUrl,
+        onPickImage = { termImagePicker.launch("image/*") }
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    TextField(
+        value = currentCard.definitionText ?: "",
+        onValueChange = { newDefinition -> onFlashcardChange(currentCard.copy(definitionText = newDefinition)) },
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text("Definition (back side)") }
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    ImagePickerRow(
+        imageUri = currentCard.definitionImageUrl,
+        onPickImage = { definitionImagePicker.launch("image/*") }
+    )
+}
+
+@Composable
+fun ImagePickerRow(imageUri: String?, onPickImage: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
+        IconButton(
+            onClick = onPickImage,
+            modifier = Modifier.size(56.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.picture_icon),
+                contentDescription = "Add Image",
+                tint = Color.Black
+            )
+        }
+        imageUri?.let { uri ->
+            Image(
+                painter = rememberAsyncImagePainter(uri),
+                contentDescription = "Selected Image",
+                modifier = Modifier.size(56.dp).padding(start = 8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun NavigationButtons(
+    currentIndex: Int,
+    flashcardsSize: Int,
+    onIndexChange: (Int) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Button(
+            onClick = { if (currentIndex > 0) onIndexChange(currentIndex - 1) },
+            enabled = currentIndex > 0,
+            modifier = Modifier.width(120.dp)
+        ) {
+            Text("Previous", fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic, color = Color.Black)
+        }
+        Button(
+            onClick = { if (currentIndex < flashcardsSize - 1) onIndexChange(currentIndex + 1) },
+            enabled = currentIndex < flashcardsSize - 1,
+            modifier = Modifier.width(120.dp)
+        ) {
+            Text("Next", fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic, color = Color.Black)
         }
     }
 }

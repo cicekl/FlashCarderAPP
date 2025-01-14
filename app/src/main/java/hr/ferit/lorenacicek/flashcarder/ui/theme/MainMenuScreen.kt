@@ -43,111 +43,106 @@ fun MainMenuScreen(navController: NavController) {
                 modifier = Modifier.padding(top = 150.dp)
             )
             Spacer(modifier = Modifier.height(80.dp))
-            Button(
+
+            MenuButton(
+                text = "Categories",
                 onClick = {
                     navController.navigate("categories_screen")
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = GreyBtn
-                ),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .height(55.dp).width(228.dp)
-                    .align(Alignment.CenterHorizontally),
-            ) {
-                Text(
-                    text = "Categories",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.Black
-                )
-            }
+                }
+            )
+
             Spacer(modifier = Modifier.height(52.dp))
-            Button(
+
+            MenuButton(
+                text = "My Flashcards",
                 onClick = {
                     navController.navigate("my_flashcards_screen")
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = GreyBtn
-                ),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .height(55.dp).width(228.dp)
-                    .align(Alignment.CenterHorizontally),
-            ) {
-                Text(
-                    text = "My Flashcards",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.Black
-                )
-            }
+                }
+            )
+
             Spacer(modifier = Modifier.height(52.dp))
-            Button(
+
+            MenuButton(
+                text = "Favourites",
                 onClick = {
                     navController.navigate("favourites_screen")
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = GreyBtn
-                ),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .height(55.dp).width(228.dp)
-                    .align(Alignment.CenterHorizontally),
-            ) {
-                Text(
-                    text = "Favourites",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.Black
-                )
-            }
+                }
+            )
+
             Spacer(modifier = Modifier.height(220.dp))
 
-            var showTooltip by remember { mutableStateOf(false) }
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.info),
-                    contentDescription = "Info",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .align(Alignment.BottomEnd).offset(y = (-30).dp)
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onPress = {
-                                    showTooltip = true
-                                    tryAwaitRelease()
-                                    showTooltip = false
-                                }
-                            )
-                        }
-                )
-                if (showTooltip) {
-                    Popup(
-                        alignment = Alignment.BottomEnd,
-                        offset = IntOffset(x = 0, y = -300),
-                        properties = PopupProperties(focusable = false),
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .background(Yellow62)
-                                .padding(12.dp)
-                                .width(200.dp)
-                        ) {
-                            Text(
-                                text = "This application was made by Lorena Čiček.\nHave fun and learn something new!",
-                                color = Color.Black,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Normal
+            InfoTooltip()
+        }
+    }
+}
 
-                            )
+@Composable
+fun InfoTooltip() {
+    var showTooltip by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.info),
+            contentDescription = "Info",
+            modifier = Modifier
+                .size(40.dp)
+                .align(Alignment.BottomEnd)
+                .offset(y = (-30).dp)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onPress = {
+                            showTooltip = true
+                            tryAwaitRelease()
+                            showTooltip = false
                         }
-                    }
+                    )
+                }
+        )
+        if (showTooltip) {
+            Popup(
+                alignment = Alignment.BottomEnd,
+                offset = IntOffset(x = 0, y = -300),
+                properties = PopupProperties(focusable = false),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(Yellow62)
+                        .padding(12.dp)
+                        .width(200.dp)
+                ) {
+                    Text(
+                        text = "This application was made by Lorena Čiček.\nHave fun and learn something new!",
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+fun MenuButton(text: String, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = GreyBtn
+        ),
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .height(55.dp)
+            .width(228.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Normal,
+            color = Color.Black
+        )
     }
 }

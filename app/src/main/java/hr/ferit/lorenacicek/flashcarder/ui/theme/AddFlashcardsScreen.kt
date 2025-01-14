@@ -23,7 +23,6 @@ import hr.ferit.lorenacicek.flashcarder.data.MyFlashcard
 import hr.ferit.lorenacicek.flashcarder.ui.theme.GreyBtn
 import hr.ferit.lorenacicek.flashcarder.viewmodels.MyFlashcardSetViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddFlashcardsScreen(
     navController: NavHostController,
@@ -54,155 +53,169 @@ fun AddFlashcardsScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 50.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-
-                IconButton(onClick = {
-                    navController.navigate("my_flashcards_screen")
-                }) {
-                    Icon(Icons.Filled.Done, contentDescription = "Save and Exit")
-                }
-            }
-
+            AddFlashcardsHeader(navController)
             Spacer(modifier = Modifier.height(50.dp))
-
-
-            TextField(
-                value = term,
-                onValueChange = { term = it },
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .height(56.dp),
-                label = { Text("Term (front side)") },
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                )
+            AddFlashcardsInputFields(
+                term = term,
+                onTermChange = { term = it },
+                termImageUri = termImageUri,
+                onTermImagePick = { termImagePicker.launch("image/*") },
+                definition = definition,
+                onDefinitionChange = { definition = it },
+                definitionImageUri = definitionImageUri,
+                onDefinitionImagePick = { definitionImagePicker.launch("image/*") }
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                IconButton(
-                    onClick = { termImagePicker.launch("image/*") },
-                    modifier = Modifier.size(56.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.picture_icon),
-                        contentDescription = "Add Term Image",
-                        tint = Color.Black
-                    )
-                }
-
-                termImageUri?.let { uri ->
-                    Image(
-                        painter = rememberAsyncImagePainter(uri),
-                        contentDescription = "Selected Term Image",
-                        modifier = Modifier
-                            .size(56.dp)
-                            .padding(start = 8.dp)
-                    )
-                }
-            }
-
-
-            TextField(
-                value = definition,
-                onValueChange = { definition = it },
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .height(56.dp),
-                label = { Text("Definition (back side)") },
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                )
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                IconButton(
-                    onClick = { definitionImagePicker.launch("image/*") },
-                    modifier = Modifier.size(56.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.picture_icon),
-                        contentDescription = "Add Definition Image",
-                        tint = Color.Black
-                    )
-                }
-
-                definitionImageUri?.let { uri ->
-                    Image(
-                        painter = rememberAsyncImagePainter(uri),
-                        contentDescription = "Selected Definition Image",
-                        modifier = Modifier
-                            .size(56.dp)
-                            .padding(start = 8.dp)
-                    )
-                }
-            }
-
             Spacer(modifier = Modifier.height(50.dp))
-
-            Button(
-                onClick = {
-                    isUploading = true
-                    val flashcard = MyFlashcard(
-                        termText = term,
-                        termImageUrl = termImageUri?.toString(),
-                        definitionText = definition,
-                        definitionImageUrl = definitionImageUri?.toString()
-                    )
-
-                    setId?.let { id ->
-                        viewModel.addFlashcardWithImages(id, flashcard) { success ->
-                            isUploading = false
-                            if (success) {
-                                term = ""
-                                definition = ""
-                                termImageUri = null
-                                definitionImageUri = null
-
-                            }
-                        }
+            AddFlashcardsButton(
+                term = term,
+                definition = definition,
+                termImageUri = termImageUri,
+                definitionImageUri = definitionImageUri,
+                isUploading = isUploading,
+                setId = setId,
+                viewModel = viewModel,
+                onUploadStart = { isUploading = true },
+                onUploadFinish = { success ->
+                    isUploading = false
+                    if (success) {
+                        term = ""
+                        definition = ""
+                        termImageUri = null
+                        definitionImageUri = null
                     }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = GreyBtn
-                ),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .height(55.dp)
-                    .width(228.dp)
-                    .align(Alignment.CenterHorizontally),
-                enabled = !isUploading
-            ) {
-                Text(
-                    if (isUploading) "Uploading..." else "Add card",
-                    fontSize = 20.sp,
-                    color = Color.Black
-                )
-            }
+                }
+            )
         }
+    }
+}
+
+@Composable
+fun AddFlashcardsHeader(navController: NavHostController) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 50.dp, bottom = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        IconButton(onClick = { navController.popBackStack() }) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+        }
+        IconButton(onClick = { navController.navigate("my_flashcards_screen") }) {
+            Icon(Icons.Filled.Done, contentDescription = "Save and Exit")
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddFlashcardsInputFields(
+    term: String,
+    onTermChange: (String) -> Unit,
+    termImageUri: Uri?,
+    onTermImagePick: () -> Unit,
+    definition: String,
+    onDefinitionChange: (String) -> Unit,
+    definitionImageUri: Uri?,
+    onDefinitionImagePick: () -> Unit
+) {
+    TextField(
+        value = term,
+        onValueChange = onTermChange,
+        modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .height(56.dp),
+        label = { Text("Term (front side)") },
+        singleLine = true,
+        colors = TextFieldDefaults.textFieldColors(
+            containerColor = Color.White,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+        )
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    ImagePickerRow(imageUri = termImageUri, onPickImage = onTermImagePick)
+
+    TextField(
+        value = definition,
+        onValueChange = onDefinitionChange,
+        modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .height(56.dp),
+        label = { Text("Definition (back side)") },
+        singleLine = true,
+        colors = TextFieldDefaults.textFieldColors(
+            containerColor = Color.White,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+        )
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    ImagePickerRow(imageUri = definitionImageUri, onPickImage = onDefinitionImagePick)
+}
+
+@Composable
+fun ImagePickerRow(imageUri: Uri?, onPickImage: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
+        IconButton(onClick = onPickImage, modifier = Modifier.size(56.dp)) {
+            Icon(
+                painter = painterResource(id = R.drawable.picture_icon),
+                contentDescription = "Add Image",
+                tint = Color.Black
+            )
+        }
+        imageUri?.let { uri ->
+            Image(
+                painter = rememberAsyncImagePainter(uri),
+                contentDescription = "Selected Image",
+                modifier = Modifier
+                    .size(56.dp)
+                    .padding(start = 8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun AddFlashcardsButton(
+    term: String,
+    definition: String,
+    termImageUri: Uri?,
+    definitionImageUri: Uri?,
+    isUploading: Boolean,
+    setId: String?,
+    viewModel: MyFlashcardSetViewModel,
+    onUploadStart: () -> Unit,
+    onUploadFinish: (Boolean) -> Unit
+) {
+    Button(
+        onClick = {
+            onUploadStart()
+            val flashcard = MyFlashcard(
+                termText = term,
+                termImageUrl = termImageUri?.toString(),
+                definitionText = definition,
+                definitionImageUrl = definitionImageUri?.toString()
+            )
+            setId?.let { id ->
+                viewModel.addFlashcardWithImages(id, flashcard) { success ->
+                    onUploadFinish(success)
+                }
+            }
+        },
+        colors = ButtonDefaults.buttonColors(containerColor = GreyBtn),
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .height(55.dp)
+            .width(228.dp),
+        enabled = !isUploading
+    ) {
+        Text(
+            text = if (isUploading) "Uploading..." else "Add card",
+            fontSize = 20.sp,
+            color = Color.Black
+        )
     }
 }

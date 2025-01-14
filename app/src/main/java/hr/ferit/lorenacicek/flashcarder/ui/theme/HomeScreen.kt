@@ -47,7 +47,7 @@ fun HomeScreen(navController: NavController) {
                         navController.navigate("main_menu_screen")
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Yellow62
+                        containerColor = GreyBtn
                     ),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier

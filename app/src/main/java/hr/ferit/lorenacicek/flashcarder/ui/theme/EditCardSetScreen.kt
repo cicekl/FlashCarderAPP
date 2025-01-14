@@ -35,12 +35,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import hr.ferit.lorenacicek.flashcarder.viewmodels.MyFlashcardSetViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditCardSetScreen(
     navController: NavHostController,
     setId: String,
-    viewModel: MyFlashcardSetViewModel) {
+    viewModel: MyFlashcardSetViewModel
+) {
     var setName by remember { mutableStateOf("") }
     var setDescription by remember { mutableStateOf("") }
 
@@ -62,68 +62,103 @@ fun EditCardSetScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 50.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-
-                IconButton(onClick = {
-                    viewModel.updateSet(setId, setName, setDescription) {
-                        navController.popBackStack()
-                    }
-                }) {
-                    Icon(Icons.Filled.Done, contentDescription = "Save")
-                }
-            }
-
+            EditCardSetHeader(
+                navController = navController,
+                setId = setId,
+                setName = setName,
+                setDescription = setDescription,
+                viewModel = viewModel
+            )
             Spacer(modifier = Modifier.height(150.dp))
-
-            TextField(
-                value = setName,
-                onValueChange = { setName = it },
-                modifier = Modifier.fillMaxWidth(0.9f),
-                label = { Text("Name") },
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(containerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,)
+            EditCardSetInputs(
+                setName = setName,
+                onNameChange = { setName = it },
+                setDescription = setDescription,
+                onDescriptionChange = { setDescription = it }
             )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            TextField(
-                value = setDescription,
-                onValueChange = { setDescription = it },
-                modifier = Modifier.fillMaxWidth(0.9f),
-                label = { Text("Description") },
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(containerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,)
-            )
-
             Spacer(modifier = Modifier.height(100.dp))
-
-            Button(
-                onClick = { navController.navigate("edit_card_screen/$setId")
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = GreyBtn
-                ),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .height(55.dp).width(228.dp)
-                    .align(Alignment.CenterHorizontally),
-            ) {
-                Text("Edit Flashcards",
-                fontSize = 20.sp,
-                color = Color.Black)
-            }
+            EditFlashcardsButton(navController, setId)
         }
+    }
+}
+
+@Composable
+fun EditCardSetHeader(
+    navController: NavHostController,
+    setId: String,
+    setName: String,
+    setDescription: String,
+    viewModel: MyFlashcardSetViewModel
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 50.dp, bottom = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        IconButton(onClick = { navController.popBackStack() }) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+        }
+
+        IconButton(onClick = {
+            viewModel.updateSet(setId, setName, setDescription) {
+                navController.popBackStack()
+            }
+        }) {
+            Icon(Icons.Filled.Done, contentDescription = "Save")
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditCardSetInputs(
+    setName: String,
+    onNameChange: (String) -> Unit,
+    setDescription: String,
+    onDescriptionChange: (String) -> Unit
+) {
+    TextField(
+        value = setName,
+        onValueChange = onNameChange,
+        modifier = Modifier.fillMaxWidth(0.9f),
+        label = { Text("Name") },
+        singleLine = true,
+        colors = TextFieldDefaults.textFieldColors(
+            containerColor = Color.White,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        )
+    )
+    Spacer(modifier = Modifier.height(20.dp))
+    TextField(
+        value = setDescription,
+        onValueChange = onDescriptionChange,
+        modifier = Modifier.fillMaxWidth(0.9f),
+        label = { Text("Description") },
+        singleLine = true,
+        colors = TextFieldDefaults.textFieldColors(
+            containerColor = Color.White,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        )
+    )
+}
+
+@Composable
+fun EditFlashcardsButton(navController: NavHostController, setId: String) {
+    Button(
+        onClick = { navController.navigate("edit_card_screen/$setId") },
+        colors = ButtonDefaults.buttonColors(containerColor = GreyBtn),
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .height(55.dp)
+            .width(228.dp)
+    ) {
+        Text(
+            text = "Edit Flashcards",
+            fontSize = 20.sp,
+            color = Color.Black
+        )
     }
 }

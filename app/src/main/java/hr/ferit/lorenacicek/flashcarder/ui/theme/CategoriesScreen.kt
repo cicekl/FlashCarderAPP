@@ -32,67 +32,88 @@ fun CategoriesScreen(navController: NavController) {
         Category(id = "3", name = "Geography", imageResId = R.drawable.geography),
         Category(id = "4", name = "CS/IT", imageResId = R.drawable.csit)
     )
-    Surface(
-        modifier = Modifier.fillMaxSize()
-    ) {
+
+    Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 50.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            CategoriesHeader(onBackClick = { navController.navigate("main_menu_screen") })
+            Spacer(modifier = Modifier.height(20.dp))
+            CategoriesGrid(
+                categories = localCategories,
+                onCategoryClick = { categoryId ->
+                    navController.navigate("flashcard_set_screen/$categoryId")
                 }
-            }
-            Text(
-                text = "CATEGORIES",
-                style = Typography.titleLarge,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 20.dp,bottom = 15.dp)
             )
-            Spacer(modifier = Modifier.height(50.dp))
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize().align(Alignment.CenterHorizontally),
-                contentPadding = PaddingValues(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                items(localCategories) { category ->
-                    Column(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .clickable { navController.navigate("flashcard_set_screen/${category.id}") },
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = category.imageResId),
-                            contentDescription = category.name,
-                            modifier = Modifier
-                                .size(150.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = category.name,
-                            style = Typography.bodyLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
         }
+    }
+}
+
+@Composable
+fun CategoriesHeader(onBackClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 50.dp, bottom = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        IconButton(onClick = onBackClick) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+        }
+    }
+    Text(
+        text = "CATEGORIES",
+        style = Typography.titleLarge,
+        modifier = Modifier
+            .padding(top = 20.dp, bottom = 15.dp)
+    )
+}
+
+@Composable
+fun CategoriesGrid(categories: List<Category>, onCategoryClick: (String) -> Unit) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        items(categories) { category ->
+            CategoryItem(
+                category = category,
+                onClick = { onCategoryClick(category.id) }
+            )
+        }
+    }
+}
+
+@Composable
+fun CategoryItem(category: Category, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .clickable { onClick() },
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = painterResource(id = category.imageResId),
+            contentDescription = category.name,
+            modifier = Modifier
+                .size(150.dp)
+                .clip(RoundedCornerShape(16.dp))
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = category.name,
+            style = Typography.bodyLarge,
+            fontWeight = FontWeight.Bold
+        )
     }
 }

@@ -42,7 +42,9 @@ fun CategoriesScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CategoriesHeader(onBackClick = { navController.navigate("main_menu_screen") })
+
             Spacer(modifier = Modifier.height(20.dp))
+
             CategoriesGrid(
                 categories = localCategories,
                 onCategoryClick = { categoryId ->

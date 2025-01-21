@@ -15,7 +15,6 @@ import hr.ferit.lorenacicek.flashcarder.data.MyFlashcardSet
 import hr.ferit.lorenacicek.flashcarder.ui.theme.GreyBtn
 import hr.ferit.lorenacicek.flashcarder.viewmodels.MyFlashcardSetViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddSetScreen(navController: NavHostController, viewModel: MyFlashcardSetViewModel = viewModel()) {
     var setName by remember { mutableStateOf("") }

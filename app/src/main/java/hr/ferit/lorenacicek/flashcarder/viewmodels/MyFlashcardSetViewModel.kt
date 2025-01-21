@@ -10,7 +10,6 @@ import hr.ferit.lorenacicek.flashcarder.data.MyFlashcardSet
 class MyFlashcardSetViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
 
-
     fun fetchMyFlashcardSets(onResult: (List<MyFlashcardSet>) -> Unit) {
         db.collection("my_flashcard_sets")
             .get()
@@ -35,21 +34,11 @@ class MyFlashcardSetViewModel : ViewModel() {
                 batch.delete(setRef)
 
                 batch.commit()
-                    .addOnSuccessListener {
-                        println("Successfully deleted set and its cards.")
-                        onComplete()
-                    }
-                    .addOnFailureListener { exception ->
-                        println("Error deleting set or cards: ${exception.message}")
-                        onComplete()
-                    }
+                    .addOnSuccessListener { onComplete() }
+                    .addOnFailureListener { onComplete() }
             }
-            .addOnFailureListener { exception ->
-                println("Error fetching flashcards for setId: $setId, ${exception.message}")
-                onComplete()
-            }
+            .addOnFailureListener { onComplete() }
     }
-
 
     fun fetchSetById(setId: String, onComplete: (MyFlashcardSet) -> Unit) {
         db.collection("my_flashcard_sets").document(setId)
@@ -79,49 +68,32 @@ class MyFlashcardSetViewModel : ViewModel() {
         storageRef.putFile(uri)
             .addOnSuccessListener {
                 storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                    println("Image uploaded successfully: $downloadUri")
                     onResult(downloadUri.toString())
                 }.addOnFailureListener {
-                    println("Error getting download URL: ${it.message}")
                     onResult(null)
                 }
             }
             .addOnFailureListener {
-                println("Error uploading image: ${it.message}")
                 onResult(null)
             }
     }
-
 
     fun addSet(set: MyFlashcardSet, onComplete: (String?) -> Unit) {
         val setRef = db.collection("my_flashcard_sets").document()
         val setWithId = set.copy(id = setRef.id)
 
         setRef.set(setWithId)
-            .addOnSuccessListener {
-                println("Set successfully added with ID: ${setWithId.id}")
-                onComplete(setWithId.id)
-            }
-            .addOnFailureListener { exception ->
-                println("Error adding set: ${exception.message}")
-                onComplete(null)
-            }
+            .addOnSuccessListener { onComplete(setWithId.id) }
+            .addOnFailureListener { onComplete(null) }
     }
-
 
     fun addFlashcardToSet(setId: String, flashcard: MyFlashcard, onComplete: (Boolean) -> Unit) {
         val flashcardRef = db.collection("my_flashcards").document()
         val flashcardWithSetId = flashcard.copy(id = flashcardRef.id, setId = setId)
 
         flashcardRef.set(flashcardWithSetId)
-            .addOnSuccessListener {
-                println("Flashcard successfully added to set with ID: $setId")
-                onComplete(true)
-            }
-            .addOnFailureListener { exception ->
-                println("Error adding flashcard: ${exception.message}")
-                onComplete(false)
-            }
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
     }
 
     fun addFlashcardWithImages(
@@ -160,5 +132,4 @@ class MyFlashcardSetViewModel : ViewModel() {
             }
         }
     }
-
 }

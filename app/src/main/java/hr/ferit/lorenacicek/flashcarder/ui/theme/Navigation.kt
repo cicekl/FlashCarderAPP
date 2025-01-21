@@ -45,7 +45,6 @@ fun AppNavigation(navController: NavHostController) {
             FavouritesScreen(setId = setId, navController = navController, viewModel = viewModel)
         }
         composable("add_set_screen") {
-            val viewModel: MyFlashcardSetViewModel = viewModel()
             AddSetScreen(navController = navController)
         }
         composable("add_flashcards_screen?setId={setId}") { backStackEntry ->

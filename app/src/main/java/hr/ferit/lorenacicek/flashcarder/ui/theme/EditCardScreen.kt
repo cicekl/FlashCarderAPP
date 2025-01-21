@@ -1,4 +1,5 @@
 package hr.ferit.lorenacicek.flashcarder.ui.theme
+
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -15,8 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -26,36 +25,31 @@ import hr.ferit.lorenacicek.flashcarder.R
 import hr.ferit.lorenacicek.flashcarder.data.MyFlashcard
 import hr.ferit.lorenacicek.flashcarder.viewmodels.MyFlashcardViewModel
 
-
 @Composable
 fun EditCardScreen(
     navController: NavHostController,
     viewModel: MyFlashcardViewModel = viewModel(),
     setId: String
 ) {
-    var flashcards by remember { mutableStateOf(listOf<MyFlashcard>()) }
+    var flashcards = remember { mutableStateListOf<MyFlashcard>() }
     var currentIndex by remember { mutableStateOf(0) }
 
     val termImagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { selectedUri ->
-            flashcards = flashcards.toMutableList().apply {
-                val currentCard = this[currentIndex]
-                this[currentIndex] = currentCard.copy(termImageUrl = selectedUri.toString())
-            }
+            flashcards[currentIndex] = flashcards[currentIndex].copy(termImageUrl = selectedUri.toString())
         }
     }
+
     val definitionImagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { selectedUri ->
-            flashcards = flashcards.toMutableList().apply {
-                val currentCard = this[currentIndex]
-                this[currentIndex] = currentCard.copy(definitionImageUrl = selectedUri.toString())
-            }
+            flashcards[currentIndex] = flashcards[currentIndex].copy(definitionImageUrl = selectedUri.toString())
         }
     }
 
     LaunchedEffect(setId) {
         viewModel.fetchFlashcardsBySetId(setId) { cards ->
-            flashcards = cards
+            flashcards.clear()
+            flashcards.addAll(cards)
         }
     }
 
@@ -90,13 +84,6 @@ fun EmptyFlashcardsScreen(navController: NavHostController, setId: String) {
             Text(
                 text = "No cards available",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Click on the '+' icon to add a new card.",
-                fontSize = 16.sp,
                 color = Color.Black
             )
         }
@@ -109,8 +96,7 @@ fun Header(navController: NavHostController, setId: String) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 50.dp, start = 16.dp, end = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(onClick = { navController.popBackStack() }) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -125,7 +111,7 @@ fun Header(navController: NavHostController, setId: String) {
 fun FlashcardsEditor(
     navController: NavHostController,
     viewModel: MyFlashcardViewModel,
-    flashcards: List<MyFlashcard>,
+    flashcards: MutableList<MyFlashcard>,
     currentIndex: Int,
     onIndexChange: (Int) -> Unit,
     termImagePicker: ManagedActivityResultLauncher<String, Uri?>,
@@ -144,14 +130,12 @@ fun FlashcardsEditor(
         ) {
             EditorHeader(navController, viewModel, flashcards[currentIndex])
             Spacer(modifier = Modifier.height(50.dp))
-            Text("CARD #${currentIndex + 1}", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(text = "CARD #${currentIndex + 1}", fontSize = 24.sp)
             Spacer(modifier = Modifier.height(20.dp))
             CardEditor(
                 currentCard = flashcards[currentIndex],
                 onFlashcardChange = { updatedCard ->
-                    flashcards.toMutableList().apply {
-                        this[currentIndex] = updatedCard
-                    }
+                    flashcards[currentIndex] = updatedCard
                 },
                 termImagePicker = termImagePicker,
                 definitionImagePicker = definitionImagePicker
@@ -231,19 +215,12 @@ fun ImagePickerRow(imageUri: String?, onPickImage: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 8.dp)
     ) {
-        IconButton(
-            onClick = onPickImage,
-            modifier = Modifier.size(56.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.picture_icon),
-                contentDescription = "Add Image",
-                tint = Color.Black
-            )
+        IconButton(onClick = onPickImage, modifier = Modifier.size(56.dp)) {
+            Icon(painter = painterResource(id = R.drawable.picture_icon), contentDescription = "Add Image", tint = Color.Black)
         }
-        imageUri?.let { uri ->
+        imageUri?.let {
             Image(
-                painter = rememberAsyncImagePainter(uri),
+                painter = rememberAsyncImagePainter(it),
                 contentDescription = "Selected Image",
                 modifier = Modifier.size(56.dp).padding(start = 8.dp)
             )
@@ -252,11 +229,7 @@ fun ImagePickerRow(imageUri: String?, onPickImage: () -> Unit) {
 }
 
 @Composable
-fun NavigationButtons(
-    currentIndex: Int,
-    flashcardsSize: Int,
-    onIndexChange: (Int) -> Unit
-) {
+fun NavigationButtons(currentIndex: Int, flashcardsSize: Int, onIndexChange: (Int) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
@@ -266,19 +239,14 @@ fun NavigationButtons(
             enabled = currentIndex > 0,
             modifier = Modifier.width(120.dp)
         ) {
-            Text("Previous", fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic, color = Color.Black)
+            Text("Previous")
         }
         Button(
             onClick = { if (currentIndex < flashcardsSize - 1) onIndexChange(currentIndex + 1) },
             enabled = currentIndex < flashcardsSize - 1,
             modifier = Modifier.width(120.dp)
         ) {
-            Text("Next", fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic, color = Color.Black)
+            Text("Next")
         }
     }
 }
-
-
-
-
-

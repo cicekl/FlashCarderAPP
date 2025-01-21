@@ -100,7 +100,6 @@ fun FavouritesScreen(
                         onNavigate = { navController.navigate("flashcard_screen/${flashcardSet.id}") },
                         onRemoveFavorite = {
                             viewModel.toggleFavoriteStatus(flashcardSet.id, false) {
-                                // Ažuriraj stanje
                                 favoriteSets = favoriteSets.filter { it.id != flashcardSet.id }
                             }
                         }
@@ -114,7 +113,6 @@ fun FavouritesScreen(
                         onNavigate = { navController.navigate("my_flashcard_screen/${flashcardSet.id}") },
                         onRemoveFavorite = {
                             viewModelMy.toggleFavoriteStatus(flashcardSet.id, false) {
-                                // Ažuriraj stanje
                                 myfavoriteSets = myfavoriteSets.filter { it.id != flashcardSet.id }
                             }
                         }

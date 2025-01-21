@@ -1,11 +1,10 @@
 package hr.ferit.lorenacicek.flashcarder.viewmodels
+
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import hr.ferit.lorenacicek.flashcarder.data.MyFlashcard
 import hr.ferit.lorenacicek.flashcarder.data.MyFlashcardSet
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 class MyFlashcardViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
@@ -49,7 +48,6 @@ class MyFlashcardViewModel : ViewModel() {
             .addOnFailureListener { onComplete() }
     }
 
-
     fun fetchFlashcardsForSet(setId: String) {
         db.collection("my_flashcards")
             .whereEqualTo("setId", setId)
@@ -79,7 +77,6 @@ class MyFlashcardViewModel : ViewModel() {
             .addOnFailureListener { onResult(emptyList()) }
     }
 
-
     fun updateCard(
         cardId: String,
         termText: String?,
@@ -102,8 +99,6 @@ class MyFlashcardViewModel : ViewModel() {
             .addOnFailureListener { onComplete(false) }
     }
 
-    private val _editFlashcards = MutableStateFlow<List<MyFlashcard>>(emptyList())
-
     fun fetchFlashcardsBySetId(setId: String, onResult: (List<MyFlashcard>) -> Unit) {
         db.collection("my_flashcards")
             .whereEqualTo("setId", setId)
@@ -112,10 +107,8 @@ class MyFlashcardViewModel : ViewModel() {
                 val flashcards = result.documents.mapNotNull { it.toObject(MyFlashcard::class.java) }
                 onResult(flashcards)
             }
-            .addOnFailureListener { exception ->
-                println("Error fetching flashcards: ${exception.message}")
+            .addOnFailureListener {
                 onResult(emptyList())
             }
     }
-
 }
